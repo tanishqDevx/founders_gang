@@ -66,7 +66,9 @@ export async function generateMetadata({
       siteName: "Founders Gang",
       images: [
         {
-          url: data.thumbnail_url || "https://yourdomain.com/default-og.jpg",
+          url:
+            data.thumbnail_url ||
+            "https://founders-gang.vercel.app/default-og.jpg",
           width: 1200,
           height: 630,
           alt: data.title,
@@ -78,7 +80,9 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: data.title,
       description: data.mini_description,
-      images: [data.thumbnail_url || "https://yourdomain.com/default-og.jpg"],
+      images: [
+        data.thumbnail_url || "https://founders-gang.vercel.app/default-og.jpg",
+      ],
     },
   };
 }
