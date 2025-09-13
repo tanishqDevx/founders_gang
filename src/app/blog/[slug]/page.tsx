@@ -6,6 +6,18 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
+import localfont from "next/font/local";
+
+const getdreamavenue = localfont({
+  src: "../../../fonts/Dream_Avenue.ttf",
+  variable: "--font-dreamavenue",
+});
+const times = localfont({
+  src: "../../../fonts/times.ttf",
+  variable: "--font-times",
+});
 
 interface BlogPost {
   id: string;
@@ -24,7 +36,8 @@ interface BlogPost {
   };
 }
 
-// ✅ Generate SEO metadata for each blog
+// ✅ Generate SEO metadata
+const uurl = "http://localhost:3000/";
 export async function generateMetadata({
   params,
 }: {
@@ -40,7 +53,7 @@ export async function generateMetadata({
 
   if (!data) return { title: "Post not found" };
 
-  const url = `https://yourdomain.com/blog/${data.slug}`;
+  const url = `${uurl}/blog/${data.slug}`;
 
   return {
     title: data.title,
@@ -98,20 +111,173 @@ export default async function BlogPostPage({
       day: "numeric",
     });
 
+  const getReadTime = (content: string) => {
+    const wordCount = content.split(/\s+/).length;
+    const minutes = Math.ceil(wordCount / 200);
+    return `${minutes} min read`;
+  };
+
+  // ✅ Markdown custom components with syntax highlighting
+  const markdownComponents = {
+    code({ node, inline, className, children, ...props }: any) {
+      const match = /language-(\w+)/.exec(className || "");
+      return !inline && match ? (
+        <SyntaxHighlighter
+          style={tomorrow}
+          language={match[1]}
+          PreTag="div"
+          className="rounded-md"
+          {...props}
+        >
+          {String(children).replace(/\n$/, "")}
+        </SyntaxHighlighter>
+      ) : (
+        <code
+          className={`${times.className} bg-gray-100 px-1 py-0.5 rounded text-sm font-mono`}
+          {...props}
+        >
+          {children}
+        </code>
+      );
+    },
+    h1: ({ children }: any) => (
+      <h1
+        className={`${getdreamavenue.className} text-3xl font-bold mt-8 mb-4 text-gray-900`}
+      >
+        {children}
+      </h1>
+    ),
+    h2: ({ children }: any) => (
+      <h2
+        className={`${getdreamavenue.className} text-2xl font-bold mt-6 mb-3 text-gray-900`}
+      >
+        {children}
+      </h2>
+    ),
+    h3: ({ children }: any) => (
+      <h3
+        className={`${getdreamavenue.className} text-xl font-bold mt-5 mb-2 text-gray-900`}
+      >
+        {children}
+      </h3>
+    ),
+    h4: ({ children }: any) => (
+      <h4
+        className={`${getdreamavenue.className} text-lg font-semibold mt-4 mb-2 text-gray-900`}
+      >
+        {children}
+      </h4>
+    ),
+    p: ({ children }: any) => (
+      <p className={`${times.className} mb-4 text-gray-700 leading-relaxed`}>
+        {children}
+      </p>
+    ),
+    ul: ({ children }: any) => (
+      <ul
+        className={`${times.className} list-disc list-inside mb-4 space-y-1 text-gray-700`}
+      >
+        {children}
+      </ul>
+    ),
+    ol: ({ children }: any) => (
+      <ol
+        className={`${times.className} list-decimal list-inside mb-4 space-y-1 text-gray-700`}
+      >
+        {children}
+      </ol>
+    ),
+    li: ({ children }: any) => (
+      <li className={`${times.className} mb-1`}>{children}</li>
+    ),
+    blockquote: ({ children }: any) => (
+      <blockquote
+        className={`${times.className} border-l-4 border-blue-500 pl-4 py-2 mb-4 italic text-gray-600 bg-gray-50`}
+      >
+        {children}
+      </blockquote>
+    ),
+    a: ({ href, children }: any) => (
+      <a
+        href={href}
+        className={`${times.className} text-blue-600 hover:text-blue-800 underline`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {children}
+      </a>
+    ),
+    img: ({ src, alt }: any) => (
+      <img
+        src={src || "/placeholder.svg"}
+        alt={alt}
+        className="max-w-full h-auto rounded-lg my-4"
+      />
+    ),
+    table: ({ children }: any) => (
+      <div className="overflow-x-auto mb-4">
+        <table
+          className={`${times.className} min-w-full border border-gray-300`}
+        >
+          {children}
+        </table>
+      </div>
+    ),
+    thead: ({ children }: any) => (
+      <thead className="bg-gray-50">{children}</thead>
+    ),
+    tbody: ({ children }: any) => <tbody>{children}</tbody>,
+    tr: ({ children }: any) => (
+      <tr className="border-b border-gray-200">{children}</tr>
+    ),
+    th: ({ children }: any) => (
+      <th
+        className={`${times.className} px-4 py-2 text-left font-semibold text-gray-900 border-r border-gray-300 last:border-r-0`}
+      >
+        {children}
+      </th>
+    ),
+    td: ({ children }: any) => (
+      <td
+        className={`${times.className} px-4 py-2 text-gray-700 border-r border-gray-300 last:border-r-0`}
+      >
+        {children}
+      </td>
+    ),
+    hr: () => <hr className="my-6 border-gray-300" />,
+    strong: ({ children }: any) => (
+      <strong className={`${times.className} font-bold text-gray-900`}>
+        {children}
+      </strong>
+    ),
+    em: ({ children }: any) => (
+      <em className={`${times.className} italic`}>{children}</em>
+    ),
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Back button */}
         <Link
-          href="/blog"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-6"
+          href="/"
+          className={`${times.className} inline-flex items-center text-blue-600 hover:text-blue-800 mb-6`}
         >
           <ArrowLeft size={16} className="mr-2" />
           Back to all posts
         </Link>
 
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">{post.title}</h1>
-        <p className="text-xl text-gray-600 mb-6">{post.mini_description}</p>
+        {/* Title + description */}
+        <h1
+          className={`${getdreamavenue.className} text-4xl font-bold text-gray-900 mb-4`}
+        >
+          {post.title}
+        </h1>
+        <p className={`${times.className} text-xl text-gray-600 mb-6`}>
+          {post.mini_description}
+        </p>
 
+        {/* Author + metadata */}
         <div className="flex items-center space-x-4 mb-6">
           <Avatar className="w-12 h-12">
             <AvatarImage src={post.profiles?.avatar_url || undefined} />
@@ -122,23 +288,25 @@ export default async function BlogPostPage({
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">
+            <p className={`${times.className} font-medium`}>
               {post.profiles?.full_name ||
                 post.profiles?.username ||
                 "Anonymous"}
             </p>
-            <p className="text-sm text-gray-500 flex gap-3">
+            <p
+              className={`${times.className} text-sm text-gray-500 flex gap-3`}
+            >
               <span className="flex items-center gap-1">
                 <Calendar size={14} /> {formatDate(post.created_at)}
               </span>
               <span className="flex items-center gap-1">
-                <Clock size={14} /> ~
-                {Math.ceil(post.content.split(" ").length / 200)} min read
+                <Clock size={14} /> {getReadTime(post.content)}
               </span>
             </p>
           </div>
         </div>
 
+        {/* Thumbnail */}
         {post.thumbnail_url && (
           <img
             src={post.thumbnail_url}
@@ -147,17 +315,28 @@ export default async function BlogPostPage({
           />
         )}
 
+        {/* Markdown content */}
         <div className="prose max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={markdownComponents}
+          >
             {post.content}
           </ReactMarkdown>
         </div>
 
+        {/* Like & Comment buttons */}
         <div className="flex items-center justify-center gap-6 border-t border-gray-200 mt-10 pt-6">
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className={`${times.className} flex items-center gap-2`}
+          >
             <Heart size={18} /> Like
           </Button>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            className={`${times.className} flex items-center gap-2`}
+          >
             <MessageCircle size={18} /> Comment
           </Button>
         </div>
