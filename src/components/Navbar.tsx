@@ -17,7 +17,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-2">
             <a href="/">
               <img
-                src="https://foundersgang.com/FGG.jpg"
+                src="/FGG.jpg"
                 alt="Founders Gang Logo"
                 className="w-8 h-8 object-contain"
               />
