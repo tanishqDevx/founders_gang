@@ -38,8 +38,8 @@ interface BlogPost {
   };
 }
 
-// ✅ Generate SEO metadata
-const uurl = "http://localhost:3000/";
+const BASE_URL = "https://founders-gang.vercel.app/"; // replace with your production URL
+
 export async function generateMetadata({
   params,
 }: {
@@ -47,15 +47,31 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
 
-  const { data } = await supabase
+  // Fetch post data
+  const { data, error } = await supabase
     .from("blog_posts")
     .select("title, mini_description, thumbnail_url, slug")
     .eq("slug", slug)
     .single();
 
-  if (!data) return { title: "Post not found" };
+  if (error || !data) {
+    return { title: "Post not found" };
+  }
 
-  const url = `${uurl}/blog/${data.slug}`;
+  // Get public URL for thumbnail
+  let ogImageUrl = "https://founders-gang.vercel.app/FGG.jpg"; // fallback image
+
+  if (data.thumbnail_url) {
+    const { data: publicUrlData } = supabase.storage
+      .from("blog-thumbnails") // replace with your bucket name
+      .getPublicUrl(data.thumbnail_url);
+
+    if (publicUrlData.publicUrl) {
+      ogImageUrl = publicUrlData.publicUrl;
+    }
+  }
+
+  const postUrl = `${BASE_URL}/blog/${data.slug}`;
 
   return {
     title: data.title,
@@ -63,11 +79,11 @@ export async function generateMetadata({
     openGraph: {
       title: data.title,
       description: data.mini_description,
-      url,
+      url: postUrl,
       siteName: "Founders Gang",
       images: [
         {
-          url: data.thumbnail_url || "https://yourdomain.com/default-og.jpg",
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: data.title,
@@ -79,7 +95,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: data.title,
       description: data.mini_description,
-      images: [data.thumbnail_url || "https://yourdomain.com/default-og.jpg"],
+      images: [ogImageUrl],
     },
   };
 }
