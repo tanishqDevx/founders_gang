@@ -10,6 +10,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import localfont from "next/font/local";
 import Image from "next/image";
+import { Components } from "react-markdown";
 
 const getdreamavenue = localfont({
   src: "../../../fonts/Dream_Avenue.ttf",
@@ -35,28 +36,6 @@ interface BlogPost {
     full_name: string | null;
     avatar_url: string | null;
   };
-}
-
-// Define types for markdown components
-interface CodeProps {
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-  [key: string]: unknown;
-}
-
-interface ChildrenProps {
-  children?: React.ReactNode;
-}
-
-interface LinkProps {
-  href?: string;
-  children?: React.ReactNode;
-}
-
-interface ImageProps {
-  src?: string;
-  alt?: string;
 }
 
 // ✅ Generate SEO metadata
@@ -140,87 +119,87 @@ export default async function BlogPostPage({
     return `${minutes} min read`;
   };
 
-  // ✅ Markdown custom components with syntax highlighting
-  const markdownComponents = {
-    code({ inline, className, children, ...props }: CodeProps) {
+  // ✅ Markdown custom components with correct types
+  const markdownComponents: Components = {
+    code: (props: React.HTMLAttributes<HTMLElement> & { inline?: boolean }) => {
+      const { inline, className, children, ...rest } = props;
       const match = /language-(\w+)/.exec(className || "");
       return !inline && match ? (
         <SyntaxHighlighter
-          style={tomorrow}
+          style={tomorrow as { [key: string]: React.CSSProperties }}
           language={match[1]}
           PreTag="div"
           className="rounded-md"
-          {...props}
         >
           {String(children).replace(/\n$/, "")}
         </SyntaxHighlighter>
       ) : (
         <code
           className={`${times.className} bg-gray-100 px-1 py-0.5 rounded text-sm font-mono`}
-          {...props}
+          {...rest}
         >
           {children}
         </code>
       );
     },
-    h1: ({ children }: ChildrenProps) => (
+    h1: ({ children }) => (
       <h1
         className={`${getdreamavenue.className} text-3xl font-bold mt-8 mb-4 text-gray-900`}
       >
         {children}
       </h1>
     ),
-    h2: ({ children }: ChildrenProps) => (
+    h2: ({ children }) => (
       <h2
         className={`${getdreamavenue.className} text-2xl font-bold mt-6 mb-3 text-gray-900`}
       >
         {children}
       </h2>
     ),
-    h3: ({ children }: ChildrenProps) => (
+    h3: ({ children }) => (
       <h3
         className={`${getdreamavenue.className} text-xl font-bold mt-5 mb-2 text-gray-900`}
       >
         {children}
       </h3>
     ),
-    h4: ({ children }: ChildrenProps) => (
+    h4: ({ children }) => (
       <h4
         className={`${getdreamavenue.className} text-lg font-semibold mt-4 mb-2 text-gray-900`}
       >
         {children}
       </h4>
     ),
-    p: ({ children }: ChildrenProps) => (
+    p: ({ children }) => (
       <p className={`${times.className} mb-4 text-gray-700 leading-relaxed`}>
         {children}
       </p>
     ),
-    ul: ({ children }: ChildrenProps) => (
+    ul: ({ children }) => (
       <ul
         className={`${times.className} list-disc list-inside mb-4 space-y-1 text-gray-700`}
       >
         {children}
       </ul>
     ),
-    ol: ({ children }: ChildrenProps) => (
+    ol: ({ children }) => (
       <ol
         className={`${times.className} list-decimal list-inside mb-4 space-y-1 text-gray-700`}
       >
         {children}
       </ol>
     ),
-    li: ({ children }: ChildrenProps) => (
+    li: ({ children }) => (
       <li className={`${times.className} mb-1`}>{children}</li>
     ),
-    blockquote: ({ children }: ChildrenProps) => (
+    blockquote: ({ children }) => (
       <blockquote
         className={`${times.className} border-l-4 border-blue-500 pl-4 py-2 mb-4 italic text-gray-600 bg-gray-50`}
       >
         {children}
       </blockquote>
     ),
-    a: ({ href, children }: LinkProps) => (
+    a: ({ href, children }) => (
       <a
         href={href}
         className={`${times.className} text-blue-600 hover:text-blue-800 underline`}
@@ -230,16 +209,16 @@ export default async function BlogPostPage({
         {children}
       </a>
     ),
-    img: ({ src, alt }: ImageProps) => (
+    img: ({ src, alt }) => (
       <Image
-        src={src || "/placeholder.svg"}
+        src={(src as string) || "/placeholder.svg"}
         alt={alt || ""}
         width={800}
         height={400}
         className="max-w-full h-auto rounded-lg my-4"
       />
     ),
-    table: ({ children }: ChildrenProps) => (
+    table: ({ children }) => (
       <div className="overflow-x-auto mb-4">
         <table
           className={`${times.className} min-w-full border border-gray-300`}
@@ -248,21 +227,19 @@ export default async function BlogPostPage({
         </table>
       </div>
     ),
-    thead: ({ children }: ChildrenProps) => (
-      <thead className="bg-gray-50">{children}</thead>
-    ),
-    tbody: ({ children }: ChildrenProps) => <tbody>{children}</tbody>,
-    tr: ({ children }: ChildrenProps) => (
+    thead: ({ children }) => <thead className="bg-gray-50">{children}</thead>,
+    tbody: ({ children }) => <tbody>{children}</tbody>,
+    tr: ({ children }) => (
       <tr className="border-b border-gray-200">{children}</tr>
     ),
-    th: ({ children }: ChildrenProps) => (
+    th: ({ children }) => (
       <th
         className={`${times.className} px-4 py-2 text-left font-semibold text-gray-900 border-r border-gray-300 last:border-r-0`}
       >
         {children}
       </th>
     ),
-    td: ({ children }: ChildrenProps) => (
+    td: ({ children }) => (
       <td
         className={`${times.className} px-4 py-2 text-gray-700 border-r border-gray-300 last:border-r-0`}
       >
@@ -270,12 +247,12 @@ export default async function BlogPostPage({
       </td>
     ),
     hr: () => <hr className="my-6 border-gray-300" />,
-    strong: ({ children }: ChildrenProps) => (
+    strong: ({ children }) => (
       <strong className={`${times.className} font-bold text-gray-900`}>
         {children}
       </strong>
     ),
-    em: ({ children }: ChildrenProps) => (
+    em: ({ children }) => (
       <em className={`${times.className} italic`}>{children}</em>
     ),
   };

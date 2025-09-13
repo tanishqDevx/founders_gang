@@ -1,13 +1,13 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import localfont from "next/font/local";
 
 const getdreamavenue = localfont({
   src: "../fonts/Dream_Avenue.ttf",
 });
-const times = localfont({
-  src: "../fonts/times.ttf",
-});
+
+// Removed unused 'times' font - add it back if you plan to use it
 
 interface BlogCardProps {
   id: string;
@@ -35,12 +35,14 @@ const BlogCard = ({
   return (
     <Link href={`/blog/${id}`} className="block h-full">
       <article className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 group h-full flex flex-col">
-        <div className="aspect-video bg-gray-200 overflow-hidden flex-shrink-0">
+        <div className="aspect-video bg-gray-200 overflow-hidden flex-shrink-0 relative">
           {image ? (
-            <img
+            <Image
               src={image}
               alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500"></div>

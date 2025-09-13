@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { supabase } from "../integrations/supabase/client";
 import {
@@ -10,6 +11,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselApi,
 } from "@/components/ui/carousel";
 import { Loader2 } from "lucide-react";
 import localfont from "next/font/local";
@@ -70,7 +72,7 @@ const fallbackFeaturedPosts: FeaturedPost[] = [
 const HeroSection = () => {
   const [posts, setPosts] = useState<FeaturedPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [api, setApi] = useState<any>(null);
+  const [api, setApi] = useState<CarouselApi>();
 
   // Fetch featured posts
   useEffect(() => {
@@ -141,10 +143,12 @@ const HeroSection = () => {
           {posts.map((post) => (
             <CarouselItem key={post.id} className="p-0 m-0 basis-full">
               <div className="relative h-[600px] w-full">
-                <img
+                <Image
                   src={post.thumbnail_url || "/placeholder.svg"}
                   alt={post.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-8 md:p-16 text-white max-w-7xl mx-auto">
@@ -166,12 +170,13 @@ const HeroSection = () => {
                   </h1>
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gray-300 rounded-full overflow-hidden">
+                      <div className="relative w-8 h-8 bg-gray-300 rounded-full overflow-hidden">
                         {post.profiles?.avatar_url && (
-                          <img
+                          <Image
                             src={post.profiles.avatar_url}
                             alt={post.profiles.username || "Author"}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
                           />
                         )}
                       </div>

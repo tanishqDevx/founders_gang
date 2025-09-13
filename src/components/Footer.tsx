@@ -1,4 +1,5 @@
 import { Instagram, Linkedin, Youtube } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -6,7 +7,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
         {/* Logo and copyright */}
         <div className="flex flex-col sm:flex-row items-center gap-2">
-          <img
+          <Image
             src="/fglogo.jpg"
             alt="Founders Gang Logo"
             width={32}
