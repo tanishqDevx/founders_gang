@@ -44,17 +44,51 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  // Wait for slug param
   const { slug } = await params;
 
-  const { data } = await supabase
+  // Fetch blog post data from Supabase
+  const { data, error } = await supabase
     .from("blog_posts")
-    .select("title, mini_description, thumbnail_url, slug")
+    .select("title, mini_description, thumbnail_url, slug, updated_at")
     .eq("slug", slug)
     .single();
 
-  if (!data) return { title: "Post not found" };
+  if (error || !data) {
+    return {
+      title: "Post not found",
+      description: "This post does not exist.",
+      openGraph: {
+        title: "Post not found",
+        description: "This post does not exist.",
+        url: "https://founders-gang.vercel.app",
+        siteName: "Founders Gang",
+        images: [
+          {
+            url: "https://founders-gang.vercel.app/default-og.jpg",
+            width: 1200,
+            height: 630,
+            alt: "Founders Gang",
+          },
+        ],
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Post not found",
+        description: "This post does not exist.",
+        images: ["https://founders-gang.vercel.app/default-og.jpg"],
+      },
+    };
+  }
 
+  // Construct post URL
   const url = `https://founders-gang.vercel.app/blog/${data.slug}`;
+
+  // Cache-busting for WhatsApp / social previews
+  const ogImage = data.thumbnail_url
+    ? `${data.thumbnail_url}?v=${new Date(data.updated_at).getTime()}`
+    : "https://founders-gang.vercel.app/default-og.jpg";
 
   return {
     title: data.title,
@@ -66,9 +100,7 @@ export async function generateMetadata({
       siteName: "Founders Gang",
       images: [
         {
-          url:
-            data.thumbnail_url ||
-            "https://founders-gang.vercel.app/default-og.jpg",
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: data.title,
@@ -80,9 +112,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: data.title,
       description: data.mini_description,
-      images: [
-        data.thumbnail_url || "https://founders-gang.vercel.app/default-og.jpg",
-      ],
+      images: [ogImage],
     },
   };
 }
